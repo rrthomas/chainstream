@@ -11,3 +11,5 @@ release: dist
 	twine upload dist/* && \
 	git tag v$$(python3 setup.py --version) && \
 	git push --tags
+
+.PHONY:	dist
