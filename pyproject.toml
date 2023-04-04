@@ -1,6 +1,6 @@
 [project]
 name = "chainstream"
-version = "1.0.0"
+version = "1.0.1"
 description = "Chain I/O streams together"
 license = {text = "CC-BY-SA 4.0"}
 authors = [
