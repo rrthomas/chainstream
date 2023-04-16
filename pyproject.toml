@@ -7,6 +7,7 @@ authors = [
     {name = "Reuben Thomas", email = "rrt@c3d.org"},
 ]
 readme = "README.md"
+urls = {homepage = "https://github.com/rrthomas/chainstream"}
 classifiers = [
     "Programming Language :: Python :: 3",
 ]
@@ -14,6 +15,3 @@ requires-python = ">=3.7"
 
 [tool.setuptools.package-data]
 "*" = ["py.typed"]
-
-[project.urls]
-homepage = "https://github.com/rrthomas/chainstream"
