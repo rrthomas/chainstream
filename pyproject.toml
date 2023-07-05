@@ -7,7 +7,7 @@ authors = [
     {name = "Reuben Thomas", email = "rrt@c3d.org"},
 ]
 readme = "README.md"
-urls = {homepage = "https://github.com/rrthomas/chainstream"}
+urls = {Homepage = "https://github.com/rrthomas/chainstream"}
 classifiers = [
     "Programming Language :: Python :: 3",
 ]
