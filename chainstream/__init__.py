@@ -67,3 +67,59 @@ class ChainStream(io.RawIOBase):
         output, self.leftover = chunk[:buffer_length], chunk[buffer_length:]
         mem[:len(output)] = output
         return len(output)
+
+class TextChainStream(io.TextIOBase):
+    """
+    Chain an iterable of IO[str] together into a single buffered stream.
+    Usage:
+        def generate_open_file_streams():
+            for file in filenames:
+                yield open(file, 'r')
+        f = io.BufferedReader(ChainStream(generate_open_file_streams()))
+        f.read()
+    """
+    def __init__(self, streams: List[IO[str]]):
+        super().__init__()
+        self.leftover = ''
+        self.stream_iter = iter(streams)
+        try:
+            self.stream: Optional[IO[str]] = next(self.stream_iter)
+        except StopIteration:
+            self.stream = None
+
+    def readable(self) -> bool:
+        return True
+
+    def _read_next_chunk(self, max_length: int) -> str:
+        # Return 0 or more bytes from the current stream, first returning all
+        # leftover bytes. If the stream is closed returns b''
+        if self.leftover:
+            return self.leftover
+        if self.stream is not None:
+            data = self.stream.read(max_length)
+            assert data is not None # FIXME: allow stream to be non-blocking
+            return data
+        return ''
+
+    def read(self, size: Optional[int] = -1) -> str:
+        return super().read(size)
+
+    def readinto(self, b: WriteableBuffer) -> int:
+        mem = memoryview(b) # Allow slicing of the buffer
+        buffer_length = len(mem)
+        chunk = self._read_next_chunk(buffer_length)
+        while len(chunk) == 0:
+            # move to next stream
+            if self.stream is not None:
+                self.stream.close()
+            try:
+                self.stream = next(self.stream_iter)
+                chunk = self._read_next_chunk(buffer_length)
+            except StopIteration:
+                # No more streams to chain together
+                self.stream = None
+                return 0  # indicate EOF
+        output, self.leftover = chunk[:buffer_length], chunk[buffer_length:]
+        output_bytes = bytes(output, 'utf-8')
+        mem[:len(output)] = output_bytes
+        return len(output)
