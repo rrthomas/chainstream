@@ -1,4 +1,5 @@
-"""
+"""Chain streams together.
+
 © Reuben Thomas 2023.
 This package is distributed under CC-BY-SA 4.0.
 See https://creativecommons.org/licenses/by-sa/4.0/
@@ -11,14 +12,15 @@ upwards-compatible with 4.0.
 from __future__ import annotations
 
 import io
-from typing import Optional, IO, List, TYPE_CHECKING
+from typing import IO, TYPE_CHECKING, Optional
+
 
 if TYPE_CHECKING:
     from _typeshed import WriteableBuffer
 
 class ChainStream(io.RawIOBase):
-    """
-    Chain an iterable of IO[bytes] together into a single buffered stream.
+    """Chain an iterable of IO[bytes] together into a single buffered stream.
+
     Usage:
         def generate_open_file_streams():
             for file in filenames:
@@ -26,7 +28,7 @@ class ChainStream(io.RawIOBase):
         f = io.BufferedReader(ChainStream(generate_open_file_streams()))
         f.read()
     """
-    def __init__(self, streams: List[IO[bytes]]):
+    def __init__(self, streams: list[IO[bytes]]):
         super().__init__()
         self.leftover = b''
         self.stream_iter = iter(streams)
