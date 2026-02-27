@@ -12,11 +12,12 @@ upwards-compatible with 4.0.
 from __future__ import annotations
 
 import io
-from typing import IO, TYPE_CHECKING, Optional
+from typing import IO, TYPE_CHECKING
 
 
 if TYPE_CHECKING:
     from _typeshed import WriteableBuffer
+
 
 class ChainStream(io.RawIOBase):
     """Chain an iterable of IO[bytes] together into a single buffered stream.
@@ -28,12 +29,13 @@ class ChainStream(io.RawIOBase):
         f = io.BufferedReader(ChainStream(generate_open_file_streams()))
         f.read()
     """
+
     def __init__(self, streams: list[IO[bytes]]):
         super().__init__()
-        self.leftover = b''
+        self.leftover = b""
         self.stream_iter = iter(streams)
         try:
-            self.stream: Optional[IO[bytes]] = next(self.stream_iter)
+            self.stream: IO[bytes] | None = next(self.stream_iter)
         except StopIteration:
             self.stream = None
 
@@ -47,12 +49,12 @@ class ChainStream(io.RawIOBase):
             return self.leftover
         if self.stream is not None:
             data = self.stream.read(max_length)
-            assert data is not None # FIXME: allow stream to be non-blocking
+            assert data is not None  # FIXME: allow stream to be non-blocking
             return data
-        return b''
+        return b""
 
     def readinto(self, b: WriteableBuffer) -> int:
-        mem = memoryview(b) # Allow slicing of the buffer
+        mem = memoryview(b)  # Allow slicing of the buffer
         buffer_length = len(mem)
         chunk = self._read_next_chunk(buffer_length)
         while len(chunk) == 0:
@@ -67,5 +69,5 @@ class ChainStream(io.RawIOBase):
                 self.stream = None
                 return 0  # indicate EOF
         output, self.leftover = chunk[:buffer_length], chunk[buffer_length:]
-        mem[:len(output)] = output
+        mem[: len(output)] = output
         return len(output)
